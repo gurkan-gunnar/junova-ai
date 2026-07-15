@@ -1,0 +1,66 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+
+def legacyDebugKeystore = providers.gradleProperty("junovaDebugKeystore")
+    .orElse(providers.environmentVariable("JUNOVA_DEBUG_KEYSTORE"))
+    .getOrNull()
+def legacyDebugStorePassword = providers.gradleProperty("junovaDebugStorePassword")
+    .orElse(providers.environmentVariable("JUNOVA_DEBUG_STORE_PASSWORD"))
+    .getOrElse("")
+def legacyDebugKeyAlias = providers.gradleProperty("junovaDebugKeyAlias")
+    .orElse(providers.environmentVariable("JUNOVA_DEBUG_KEY_ALIAS"))
+    .getOrElse("")
+def legacyDebugKeyPassword = providers.gradleProperty("junovaDebugKeyPassword")
+    .orElse(providers.environmentVariable("JUNOVA_DEBUG_KEY_PASSWORD"))
+    .getOrElse("")
+def hasLegacyDebugSigning = legacyDebugKeystore && file(legacyDebugKeystore).isFile()
+
+android {
+    namespace "se.local.aiassistent"
+    compileSdk 36
+
+    signingConfigs {
+        if (hasLegacyDebugSigning) {
+            legacyDebug {
+                storeFile file(legacyDebugKeystore)
+                storePassword legacyDebugStorePassword
+                keyAlias legacyDebugKeyAlias
+                keyPassword legacyDebugKeyPassword
+            }
+        }
+    }
+
+    defaultConfig {
+        applicationId "se.local.aiassistent"
+        minSdk 33
+        targetSdk 35
+        versionCode 51
+        versionName "3.31"
+    }
+
+    buildTypes {
+        debug {
+            if (hasLegacyDebugSigning) {
+                signingConfig signingConfigs.legacyDebug
+            }
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation project(":llama-lib")
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
+    implementation "com.google.mlkit:text-recognition:16.0.1"
+    implementation "com.google.mlkit:image-labeling:17.0.9"
+}

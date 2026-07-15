@@ -1,0 +1,16 @@
+{
+  "model": "junova-qwen-3b",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Du är Junova AI. Svara naturligt, kort och korrekt på svenska. Säg tydligt när något är osäkert."
+    },
+    {
+      "role": "user",
+      "content": "Förklara skillnaden mellan massa och vikt med ett enkelt exempel."
+    }
+  ],
+  "temperature": 0.65,
+  "max_tokens": 220,
+  "stream": false
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Junova AI">
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#101918"/>
+  <circle cx="40" cy="22" r="13" fill="none" stroke="#41d6cf" stroke-width="3" opacity="0.9"/>
+  <circle cx="52" cy="14" r="3" fill="#f3c969"/>
+  <path d="M25 17h12v22c0 8-5 13-13 13-7 0-12-4-14-10l10-5c1 3 2 5 5 5 2 0 3-2 3-5V17z" fill="#b8ef63"/>
+  <path d="M12 25c5-9 14-14 25-14" fill="none" stroke="#f4f7f6" stroke-width="2.5" stroke-linecap="round" opacity="0.78"/>
+</svg>

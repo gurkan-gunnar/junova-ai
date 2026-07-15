@@ -1,0 +1,27 @@
+{
+  "generated": "2026-07-12T10:52:50.480Z",
+  "count": 3097,
+  "previous_count": 2017,
+  "added_or_cleaned_delta": 1080,
+  "dataset_count": 542,
+  "packs": {
+    "existing_preserved": 2017,
+    "expert_added": 630,
+    "restcountries_added": 1250,
+    "wikipedia_added": 0,
+    "wikipedia_queries": 145
+  },
+  "remote_sources": [
+    {
+      "name": "Countries JSON by mledoze",
+      "url": "https://github.com/mledoze/countries",
+      "count": 1250
+    },
+    {
+      "name": "Svenska Wikipedia search + summary API",
+      "url": "https://sv.wikipedia.org/",
+      "count": 0
+    }
+  ],
+  "note": "AI-assistent loads this local JavaScript file as a searchable offline knowledge pack. Links are kept for source checks."
+}

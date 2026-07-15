@@ -1,0 +1,11 @@
+services:
+  junova-3b:
+    build:
+      context: .
+      args:
+        LLAMA_IMAGE: ghcr.io/ggml-org/llama.cpp:server
+    environment:
+      LLAMA_API_KEY: ${JUNOVA_API_KEY:?Set JUNOVA_API_KEY before starting}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

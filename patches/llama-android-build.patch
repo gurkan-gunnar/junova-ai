@@ -1,0 +1,12 @@
+diff --git a/examples/llama.android/lib/build.gradle.kts b/examples/llama.android/lib/build.gradle.kts
+index ae95f41..3887197 100644
+--- a/examples/llama.android/lib/build.gradle.kts
++++ b/examples/llama.android/lib/build.gradle.kts
+@@ -2,2 +2,2 @@ plugins {
+-    alias(libs.plugins.android.library)
+-    alias(libs.plugins.jetbrains.kotlin.android)
++    id("com.android.library")
++    id("org.jetbrains.kotlin.android")
+@@ -19 +19 @@ android {
+-             abiFilters += listOf("arm64-v8a", "x86_64")
++             abiFilters += listOf("arm64-v8a")

@@ -1,0 +1,38 @@
+# Build outputs and private device data
+/*.apk
+/*.aab
+/*.png
+/migration/
+/models/
+/screenshots/
+/test-artifacts/
+/temp/
+/downloads/
+
+# Local toolchains and caches
+/android-sdk/
+/android-user-home/
+/gradle-cache/
+/tools/
+
+# Android and Gradle
+**/build/
+**/.gradle/
+**/.kotlin/
+**/.cxx/
+**/.idea/
+/android-app/node_modules/
+/android-app/local-sdk/
+/android-app/local.properties
+/android-app/*.hprof
+/android-app/hs_err_*
+/android-app/replay_*
+
+# Logs and operating-system files
+*.log
+.DS_Store
+Thumbs.db
+
+# Keep llama.cpp as a submodule, not copied vendor source
+/vendor/*
+!/vendor/llama.cpp/
