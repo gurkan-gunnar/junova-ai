@@ -335,7 +335,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void onComplete(String id) {
                     deliverLanguageEvent("window.__localModelComplete", id, "");
-                    runOnUiThread(() -> showAnswerNotification("Ditt lokala 3B-svar är färdigt."));
+                    runOnUiThread(() -> showAnswerNotification("Ditt lokala 5B-svar är färdigt."));
                 }
 
                 @Override
@@ -542,7 +542,7 @@ public class MainActivity extends Activity {
             try {
                 connection.setConnectTimeout(timeoutMs);
                 connection.setReadTimeout(timeoutMs);
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.30");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.33");
                 connection.setRequestProperty("Accept-Language", "sv-SE,sv;q=0.9,en;q=0.7");
                 connection.setInstanceFollowRedirects(false);
                 int status = connection.getResponseCode();

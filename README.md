@@ -1,13 +1,14 @@
 # Junova AI
 
-Junova AI ar en svensk Android-assistent som kor lokalt pa telefonen utan extern AI-API. Appen kombinerar en egen kunskapsmotor med Qwen2.5 3B, lokalt samtalsminne, direkt webbsokning, OCR, bildanalys och lokalt bildskapande.
+Junova AI ar en svensk Android-assistent som kor lokalt pa telefonen utan extern AI-API. Appen kombinerar en egen kunskapsmotor med Gemma 4 E2B Instruct i 5B-klassen, lokalt samtalsminne, direkt webbsokning, OCR, bildanalys och lokalt bildskapande.
 
 ## Funktioner
 
-- Tre motorlagen: kombinerad, Qwen 3B lokal och egen AI.
+- Tre motorlagen: kombinerad, Gemma 4 5B lokal och egen AI.
 - Svenska svarslagen Smart, Djup, Snabb, Kreativ, Bild, Kod och Research.
 - Krypterade chattar som stannar pa enheten samt fastning och borttagning av chattar.
-- Qwen2.5 3B Instruct Q4_K_M via `llama.cpp` pa Android.
+- Gemma 4 E2B Instruct Q4_0, cirka 4,63 miljarder parametrar (5B-klassen), via `llama.cpp` pa Android.
+- Qwen2.5 3B kan ligga kvar som lokal reservmodell om 5B-filen saknas.
 - Lokal kunskapsbas med amnesmatchning, raknemotor och langtidsminne.
 - Webbsokning med kallankar nar aktuell eller saknad fakta behovs.
 - OCR, motivanalys, farganalys och jamforelse av tva bilder.
@@ -28,7 +29,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\apply-llama-an
 
 ## Lokal modell
 
-Modellfilen ar drygt 2 GB och lagras darfor inte i GitHub. Hamta den fran Qwens officiella Hugging Face-repository och verifiera SHA-256 automatiskt:
+Modellfilen ar cirka 3,35 GB och lagras darfor inte i GitHub. Hamta den fran Googles officiella Hugging Face-repository och verifiera SHA-256 automatiskt:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\download-model.ps1

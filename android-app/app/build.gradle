@@ -34,8 +34,9 @@ android {
         applicationId "se.local.aiassistent"
         minSdk 33
         targetSdk 35
-        versionCode 51
-        versionName "3.31"
+        versionCode 53
+        versionName "3.33"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -63,4 +64,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
     implementation "com.google.mlkit:text-recognition:16.0.1"
     implementation "com.google.mlkit:image-labeling:17.0.9"
+    androidTestImplementation "androidx.test.ext:junit:1.3.0"
+    androidTestImplementation "androidx.test:runner:1.7.0"
 }
