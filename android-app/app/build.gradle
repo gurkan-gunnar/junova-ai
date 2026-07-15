@@ -34,8 +34,8 @@ android {
         applicationId "se.local.aiassistent"
         minSdk 33
         targetSdk 35
-        versionCode 53
-        versionName "3.33"
+        versionCode 54
+        versionName "3.34"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

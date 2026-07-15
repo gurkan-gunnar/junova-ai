@@ -1,11 +1,12 @@
 # Junova AI
 
-Junova AI ar en svensk Android-assistent som kor lokalt pa telefonen utan extern AI-API. Appen kombinerar en egen kunskapsmotor med Gemma 4 E2B Instruct i 5B-klassen, lokalt samtalsminne, direkt webbsokning, OCR, bildanalys och lokalt bildskapande.
+Junova AI ar en svensk-engelsk Android-assistent som kor lokalt pa telefonen utan extern AI-API. Appen kombinerar en egen kunskapsmotor med Gemma 4 E2B Instruct i 5B-klassen, lokalt samtalsminne, direkt webbsokning, OCR, bildanalys och lokalt bildskapande.
 
 ## Funktioner
 
 - Tre motorlagen: kombinerad, Gemma 4 5B lokal och egen AI.
-- Svenska svarslagen Smart, Djup, Snabb, Kreativ, Bild, Kod och Research.
+- Likvardiga svenska och engelska svar med automatiskt sprakval eller ett valt sprak i installningarna.
+- Svarslagen Smart, Djup, Snabb, Kreativ, Bild, Kod och Research.
 - Krypterade chattar som stannar pa enheten samt fastning och borttagning av chattar.
 - Gemma 4 E2B Instruct Q4_0, cirka 4,63 miljarder parametrar (5B-klassen), via `llama.cpp` pa Android.
 - Qwen2.5 3B kan ligga kvar som lokal reservmodell om 5B-filen saknas.
