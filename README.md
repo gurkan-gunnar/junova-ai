@@ -11,6 +11,7 @@ Junova AI ar en svensk-engelsk Android-assistent som kor lokalt pa telefonen uta
 - Gemma 4 E2B Instruct Q4_0, cirka 4,63 miljarder parametrar (5B-klassen), via `llama.cpp` pa Android.
 - Qwen2.5 3B kan ligga kvar som lokal reservmodell om 5B-filen saknas.
 - Lokal kunskapsbas med amnesmatchning, raknemotor och langtidsminne.
+- Kortare lokal generering, hard tidsgrans och faktabaserat reservsvar om modellen blir langsam.
 - Webbsokning med kallankar nar aktuell eller saknad fakta behovs.
 - OCR, motivanalys, farganalys och jamforelse av tva bilder.
 - Lokal bildgenerator med stil- och formatval samt inspirationsbild.

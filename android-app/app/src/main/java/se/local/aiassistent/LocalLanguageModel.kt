@@ -6,9 +6,11 @@ import com.arm.aichat.InferenceEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import java.io.File
 
 /** Runs the installed GGUF model completely on the phone. */
@@ -16,6 +18,9 @@ object LocalLanguageModel {
     private const val MODEL_NAME = "gemma-4-E2B_q4_0-it.gguf"
     private const val FALLBACK_MODEL_NAME = "Qwen2.5-3B-Instruct-Q4_K_M.gguf"
     private const val LEGACY_MODEL_NAME = "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
+    private const val GENERATION_TIMEOUT_MILLIS = 42_000L
+    private const val MIN_PREDICT_LENGTH = 96
+    private const val MAX_PREDICT_LENGTH = 320
     private const val SYSTEM_PROMPT =
         "You are Junova AI, a knowledgeable, safe, and natural local AI assistant. You understand Swedish and English equally well. " +
         "Detect the language of each user request and answer in the same language unless the user explicitly asks for another language. Preserve that language across short follow-up questions. " +
@@ -41,16 +46,29 @@ object LocalLanguageModel {
     @JvmStatic
     fun ask(context: Context, prompt: String, requestId: String, conversationId: String, predictLength: Int, callback: Callback) {
         scope.launch {
+            val response = StringBuilder()
             try {
                 val loadedEngine = ensureModel(context.applicationContext, conversationId)
-                val response = StringBuilder()
-                loadedEngine.sendUserPrompt(prompt.trim(), predictLength.coerceIn(512, 512)).collect { token ->
-                    response.append(token)
+                withTimeout(GENERATION_TIMEOUT_MILLIS) {
+                    loadedEngine.sendUserPrompt(
+                        prompt.trim(),
+                        predictLength.coerceIn(MIN_PREDICT_LENGTH, MAX_PREDICT_LENGTH),
+                    ).collect { token ->
+                        response.append(token)
+                    }
                 }
                 val answer = visibleAnswer(response.toString())
                 require(answer.isNotBlank()) { "Resonemanget hann inte fram till ett färdigt svar. Försök igen." }
                 callback.onToken(requestId, answer)
                 callback.onComplete(requestId)
+            } catch (_: TimeoutCancellationException) {
+                val partialAnswer = visibleAnswer(response.toString())
+                if (partialAnswer.isNotBlank()) {
+                    callback.onToken(requestId, partialAnswer)
+                    callback.onComplete(requestId)
+                } else {
+                    callback.onError(requestId, "Tidsgränsen nåddes. Junova använder sitt snabba faktasvar.")
+                }
             } catch (error: Exception) {
                 callback.onError(requestId, error.message ?: "Den lokala modellen kunde inte starta.")
             }

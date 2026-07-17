@@ -1709,7 +1709,7 @@
       <div class="side-tools" aria-label="Konto och inställningar">
         <button class="tool-btn" type="button" data-open-panel="account"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Mitt konto</span><span class="tool-meta" id="accountLabel">Lokal profil</span></button>
         <button class="tool-btn" type="button" data-open-panel="settings"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg><span>Inställningar</span><span class="tool-meta" id="responseLengthLabel">Koncis</span></button>
-        <button class="tool-btn" type="button" data-open-panel="information"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Information</span><span class="tool-meta">3.34</span></button>
+        <button class="tool-btn" type="button" data-open-panel="information"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Information</span><span class="tool-meta">3.35</span></button>
       </div>
     </aside>
     <div class="sidebar-scrim" id="sidebarScrim"></div>
@@ -1798,7 +1798,7 @@
         <div class="setting-row"><span>Lokal modell</span><span class="version-row">Gemma 4 5B</span></div>
       </div>
       <div class="panel-section">
-        <div class="setting-row"><span>Version</span><span class="version-row">3.34</span></div>
+        <div class="setting-row"><span>Version</span><span class="version-row">3.35</span></div>
       </div>
     </div>
   </section>
@@ -1825,7 +1825,7 @@
       <button class="panel-close" type="button" data-close-panel aria-label="Stäng information" title="Stäng"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
     </header>
     <div class="panel-content">
-      <div class="profile-head"><div class="profile-avatar"><img src="junova-logo.svg" alt=""></div><div><strong>Junova AI</strong><span>Version 3.34</span></div></div>
+      <div class="profile-head"><div class="profile-avatar"><img src="junova-logo.svg" alt=""></div><div><strong>Junova AI</strong><span>Version 3.35</span></div></div>
       <div class="panel-section">
         <h3>Länkar</h3>
         <a class="info-link external-link" href="https://github.com/gurkan-gunnar/junova-ai"><span>GitHub</span><span aria-hidden="true">↗</span></a>
@@ -4383,7 +4383,7 @@
         const timer = setTimeout(() => {
           nativeWebRequests.delete(id);
           resolve([]);
-        }, 18000);
+        }, 12000);
         nativeWebRequests.set(id, { resolve, timer });
         try {
           window.NativeWeb.search(query, id);
@@ -4509,9 +4509,11 @@
       try {
         if (progress) progress("Söker på internet...");
         else status.textContent = "Söker på internet...";
-        const nativeFacts = await nativeInternetSearch(question, type);
         const english = responseLanguage(question) === "en";
-        const primary = await wikiSearchLanguage(question, english ? "en" : "sv");
+        const [nativeFacts, primary] = await Promise.all([
+          nativeInternetSearch(question, type),
+          wikiSearchLanguage(question, english ? "en" : "sv")
+        ]);
         const secondary = primary.length >= 3 ? [] : await wikiSearchLanguage(question, english ? "sv" : "en", 3);
         if (progress) progress("Kontrollerar webbkällor...");
         const combined = [...nativeFacts, ...primary, ...secondary].filter(Boolean);
@@ -6379,15 +6381,33 @@
       };
     }
 
+    function timedModelFallback(question, facts, reasoning, sources) {
+      const english = responseLanguage(question) === "en";
+      const usable = facts.filter(fact => !hasBrokenText(fact) && String(factText(fact) || "").trim());
+      const top = usable.find(fact => looksEnglish(factText(fact)) === english);
+      if (!top) return null;
+      const text = compactFactAnswer(factText(top), modelMode === "quick" ? 300 : 620, modelMode === "quick" ? 1 : 3);
+      if (!text) return null;
+      return {
+        text,
+        reasoning: [
+          ...reasoning,
+          english
+            ? "The local model reached its time limit, so I answered directly from the strongest matching evidence."
+            : "Den lokala modellen nådde tidsgränsen, så jag svarade direkt från den starkaste faktaträffen."
+        ],
+        sources: [...new Set(sources.length ? sources : [top.title])]
+      };
+    }
+
     const localModelRequests = new Map();
     let primedLocalConversationId = null;
 
     function responseTokenLimit() {
-      if (modelMode === "quick") return 192;
-      if (modelMode === "deep") return 512;
-      if (modelMode === "research" || modelMode === "code") return 512;
-      if (modelMode === "creative") return 448;
-      return 384;
+      if (modelMode === "quick") return 128;
+      if (modelMode === "deep" || modelMode === "research" || modelMode === "code") return 320;
+      if (modelMode === "creative") return 288;
+      return preferences.responseLength === "concise" ? 224 : 256;
     }
 
     function conversationContext(question, language = responseLanguage(question)) {
@@ -6496,7 +6516,7 @@
           request.finished = true;
           localModelRequests.delete(id);
           resolve(null);
-        }, 240000);
+        }, 48000);
         request.timeout = timeout;
         localModelRequests.set(id, request);
         window.LocalLanguage.ask(localModelPrompt(question, facts, type, confidence), id, responseTokenLimit(), currentChat().id);
@@ -6513,6 +6533,12 @@
       return text;
     }
 
+    function isUnhelpfulModelAnswer(text) {
+      const clean = canonicalText(text);
+      if (!clean || clean.length > 260) return false;
+      return /^(jag forstar inte|jag fattar inte|jag vet inte|det vet jag inte|jag kan inte svara|kan inte svara|behover mer information|i do not understand|i don t understand|i do not know|i don t know|i cannot answer|i can t answer|not enough information)\b/.test(clean);
+    }
+
     function finishLocalModelRequest(payload, failed = false) {
       const request = localModelRequests.get(payload?.id);
       if (!request || request.finished) return;
@@ -6520,8 +6546,9 @@
       clearTimeout(request.timeout);
       localModelRequests.delete(payload.id);
       const text = verifyGroundedModelText(sanitizeAssistantText(request.text), request.facts);
-      if (!failed && text) primedLocalConversationId = request.conversationId;
-      request.resolve(!failed && text ? {
+      const usableAnswer = !failed && text && !isUnhelpfulModelAnswer(text);
+      if (usableAnswer) primedLocalConversationId = request.conversationId;
+      request.resolve(usableAnswer ? {
         text,
         reasoning: [engineMode === "gemma"
           ? "Den nedladdade Gemma 4-modellen använde samtalsminnet och relevanta offlinefakta utan webbsökning."
@@ -6674,12 +6701,12 @@
         ? null
         : await askLocalLanguageModel(repairedQuestion, facts, type, confidence);
       if (localAnswer) return attachWebMeta({ ...localAnswer, sources }, webFacts, searchQuestion);
-      if (engineMode === "gemma") {
-        return {
-          text: language === "en" ? "The downloaded Gemma 4 model could not start. Check that the 5B model file is still on the phone and try again." : "Den nedladdade Gemma 4-modellen kunde inte starta just nu. Kontrollera att 5B-modellfilen finns kvar på telefonen och försök igen.",
-          reasoning: [language === "en" ? "Gemma 4 did not return a completed answer." : "Gemma 4-läget fick inget färdigt svar från den lokala modellen."],
-          sources: [language === "en" ? "Gemma 4 local" : "Gemma 4 lokal"]
-        };
+      if (engineMode !== "custom") {
+        progress(language === "en" ? "Using a faster evidence-based answer..." : "Bygger ett snabbare svar från faktaunderlaget...");
+        const timedFallback = timedModelFallback(repairedQuestion, facts, reasoning, sources);
+        if (timedFallback && ["general", "explain", "sport", "summary"].includes(type)) {
+          return attachWebMeta(timedFallback);
+        }
       }
       progress("Bygger svaret från underlaget...");
       const modernAnswer = await askModernAI(searchQuestion, facts, type);
@@ -6935,6 +6962,27 @@
       render();
     }
 
+    function responseDeadlineFallback(question) {
+      const english = responseLanguage(question) === "en";
+      return {
+        text: english
+          ? "I stopped this attempt because it took too long. I won't keep you waiting for several minutes. Send the question again in one short sentence and Junova will use the faster path."
+          : "Jag stoppade försöket eftersom det tog för lång tid. Du ska inte behöva vänta i flera minuter. Skicka frågan igen i en kort mening, så använder Junova den snabbare vägen.",
+        reasoning: [english ? "The complete response pipeline reached its hard time limit." : "Hela svarskedjan nådde sin hårda tidsgräns."],
+        sources: [english ? "Response time protection" : "Svarstidsskydd"]
+      };
+    }
+
+    function withResponseDeadline(work, question, milliseconds = 72000) {
+      let timer = null;
+      const deadline = new Promise(resolve => {
+        timer = setTimeout(() => resolve(responseDeadlineFallback(question)), milliseconds);
+      });
+      return Promise.race([work, deadline]).finally(() => {
+        if (timer) clearTimeout(timer);
+      });
+    }
+
     async function sendPrompt(text) {
       const selectedImages = attachedImages.map(storedImageAttachment);
       const q = text.trim() || (selectedImages.length > 1 ? "Jämför bilderna" : selectedImages.length === 1 ? "Vad finns i bilden?" : "");
@@ -6975,7 +7023,7 @@
             pendingImagePrompt = "";
             result = await generateImage(imagePrompt, q);
           } else {
-            result = await answer(q, reportProgress, selectedImages);
+            result = await withResponseDeadline(answer(q, reportProgress, selectedImages), q);
           }
           reportProgress(result.questionOptions?.length ? "Förbereder en följdfråga..." : "Skriver svaret...");
           await wait(90);
