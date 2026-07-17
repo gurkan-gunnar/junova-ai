@@ -20,17 +20,46 @@ import org.junit.runner.RunWith;
 public class LocalLanguageModelTest {
     @Test
     public void testGemma5BAnswersInSwedish() throws Exception {
+        Context context = ApplicationProvider.getApplicationContext();
+
+        LocalLanguageModel.warmUp(context);
+        long warmUpDeadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(4);
+        while (!LocalLanguageModel.isReady() && System.nanoTime() < warmUpDeadline) {
+            Thread.sleep(500);
+        }
+        assertTrue("5B-modellen blev inte redo inom fyra minuter.", LocalLanguageModel.isReady());
+
+        String firstAnswer = ask(context,
+            "Svara p\u00e5 svenska med exakt ett ord: Vad heter Sveriges huvudstad?",
+            "instrumented-gemma-5b-first");
+        assertTrue("Svaret saknade Stockholm: " + firstAnswer,
+            firstAnswer.toLowerCase(Locale.ROOT).contains("stockholm"));
+        assertFalse("Privat tanketext l\u00e4ckte till svaret.",
+            firstAnswer.contains("<|channel") || firstAnswer.contains("<think>"));
+
+        long secondStarted = System.nanoTime();
+        String secondAnswer = ask(context,
+            "Svara endast med siffran: Vad \u00e4r tv\u00e5 plus tv\u00e5?",
+            "instrumented-gemma-5b-second");
+        long secondDurationSeconds = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - secondStarted);
+        assertTrue("Svaret p\u00e5 tv\u00e5 plus tv\u00e5 saknade 4: " + secondAnswer,
+            secondAnswer.contains("4"));
+        assertTrue("Chattbytet laddade om modellen och tog " + secondDurationSeconds + " sekunder.",
+            secondDurationSeconds < 30);
+        assertTrue("Modellen var inte kvar i minnet efter chattbytet.", LocalLanguageModel.isReady());
+    }
+
+    private static String ask(Context context, String prompt, String conversationId) throws Exception {
         CountDownLatch finished = new CountDownLatch(1);
         StringBuilder answer = new StringBuilder();
         AtomicReference<String> error = new AtomicReference<>("");
-        Context context = ApplicationProvider.getApplicationContext();
 
         LocalLanguageModel.ask(
             context,
-            "Svara p\u00e5 svenska med exakt ett ord: Vad heter Sveriges huvudstad?",
-            "instrumented-gemma-5b",
-            "instrumented-gemma-5b",
-            512,
+            prompt,
+            conversationId,
+            conversationId,
+            64,
             new LocalLanguageModel.Callback() {
                 @Override
                 public void onToken(String requestId, String token) {
@@ -49,12 +78,8 @@ public class LocalLanguageModelTest {
                 }
             });
 
-        assertTrue("5B-modellen svarade inte inom fem minuter.", finished.await(5, TimeUnit.MINUTES));
+        assertTrue("5B-modellen svarade inte inom en minut.", finished.await(1, TimeUnit.MINUTES));
         assertTrue("5B-modellen gav fel: " + error.get(), error.get().isEmpty());
-        String visibleAnswer = answer.toString();
-        assertTrue("Svaret saknade Stockholm: " + visibleAnswer,
-            visibleAnswer.toLowerCase(Locale.ROOT).contains("stockholm"));
-        assertFalse("Privat tanketext l\u00e4ckte till svaret.",
-            visibleAnswer.contains("<|channel") || visibleAnswer.contains("<think>"));
+        return answer.toString();
     }
 }

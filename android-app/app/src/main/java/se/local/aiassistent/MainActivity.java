@@ -139,6 +139,7 @@ public class MainActivity extends Activity {
         setContentView(webView);
         requestRuntimePermissions();
         webView.loadUrl("file:///android_asset/index.html");
+        LocalLanguageModel.warmUp(getApplicationContext());
     }
 
     private void requestRuntimePermissions() {
@@ -542,7 +543,7 @@ public class MainActivity extends Activity {
             try {
                 connection.setConnectTimeout(timeoutMs);
                 connection.setReadTimeout(timeoutMs);
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.38");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.40");
                 connection.setRequestProperty("Accept-Language", "sv-SE,sv;q=1.0,en-US;q=1.0,en;q=0.9");
                 connection.setInstanceFollowRedirects(false);
                 int status = connection.getResponseCode();
