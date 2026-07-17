@@ -326,7 +326,7 @@ public class MainActivity extends Activity {
             String safeRequestId = requestId == null ? "" : requestId;
             String safeConversationId = conversationId == null ? "default" : conversationId;
             if (safePrompt.isEmpty()) return;
-            LocalLanguageModel.ask(getApplicationContext(), safePrompt, safeRequestId, safeConversationId, Math.max(96, Math.min(maxTokens, 768)), new LocalLanguageModel.Callback() {
+            LocalLanguageModel.ask(getApplicationContext(), safePrompt, safeRequestId, safeConversationId, Math.max(64, Math.min(maxTokens, 288)), new LocalLanguageModel.Callback() {
                 @Override
                 public void onToken(String id, String token) {
                     deliverLanguageEvent("window.__localModelToken", id, token);
@@ -542,7 +542,7 @@ public class MainActivity extends Activity {
             try {
                 connection.setConnectTimeout(timeoutMs);
                 connection.setReadTimeout(timeoutMs);
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.37");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.38");
                 connection.setRequestProperty("Accept-Language", "sv-SE,sv;q=1.0,en-US;q=1.0,en;q=0.9");
                 connection.setInstanceFollowRedirects(false);
                 int status = connection.getResponseCode();

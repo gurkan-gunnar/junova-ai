@@ -18,15 +18,15 @@ object LocalLanguageModel {
     private const val MODEL_NAME = "gemma-4-E2B_q4_0-it.gguf"
     private const val FALLBACK_MODEL_NAME = "Qwen2.5-3B-Instruct-Q4_K_M.gguf"
     private const val LEGACY_MODEL_NAME = "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
-    private const val GENERATION_TIMEOUT_MILLIS = 42_000L
-    private const val MIN_PREDICT_LENGTH = 96
-    private const val MAX_PREDICT_LENGTH = 320
+    private const val MIN_PREDICT_LENGTH = 64
+    private const val MAX_PREDICT_LENGTH = 288
     private const val SYSTEM_PROMPT =
         "You are Junova AI, a knowledgeable, safe, and natural local AI assistant. You understand Swedish and English equally well. " +
         "Detect the language of each user request and answer in the same language unless the user explicitly asks for another language. Preserve that language across short follow-up questions. " +
         "Use natural, idiomatic English for English requests and natural, idiomatic Swedish for Swedish requests. Never mix the two languages accidentally. " +
         "For every turn, identify the exact subject and the specific property asked about. If the subject changed, do not continue answering the previous subject. Mention the current subject and requested property in the first sentence. " +
         "A fact about the correct entity is not an answer when it addresses a different property, such as ownership instead of whether a place is good for swimming. " +
+        "When a request contains several clear questions, answer each one briefly and in order. " +
         "Analyze silently and briefly. Check that the answer stays on the exact topic, and ask when an important meaning is ambiguous. " +
         "Do not reveal private reasoning. Give the answer first and add a short explanation only when it helps. " +
         "Be confident when the evidence is clear, calibrate uncertainty, and ask before assuming the user's meaning. " +
@@ -51,10 +51,11 @@ object LocalLanguageModel {
             val response = StringBuilder()
             try {
                 val loadedEngine = ensureModel(context.applicationContext, conversationId)
-                withTimeout(GENERATION_TIMEOUT_MILLIS) {
+                val safePredictLength = predictLength.coerceIn(MIN_PREDICT_LENGTH, MAX_PREDICT_LENGTH)
+                withTimeout(generationTimeoutMillis(safePredictLength)) {
                     loadedEngine.sendUserPrompt(
                         prompt.trim(),
-                        predictLength.coerceIn(MIN_PREDICT_LENGTH, MAX_PREDICT_LENGTH),
+                        safePredictLength,
                     ).collect { token ->
                         response.append(token)
                     }
@@ -75,6 +76,13 @@ object LocalLanguageModel {
                 callback.onError(requestId, error.message ?: "Den lokala modellen kunde inte starta.")
             }
         }
+    }
+
+    private fun generationTimeoutMillis(predictLength: Int): Long = when {
+        predictLength <= 96 -> 20_000L
+        predictLength <= 180 -> 28_000L
+        predictLength <= 240 -> 34_000L
+        else -> 42_000L
     }
 
     private suspend fun ensureModel(context: Context, conversationId: String): InferenceEngine {
