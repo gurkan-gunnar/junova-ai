@@ -542,7 +542,7 @@ public class MainActivity extends Activity {
             try {
                 connection.setConnectTimeout(timeoutMs);
                 connection.setReadTimeout(timeoutMs);
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.36");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Junova-AI/3.37");
                 connection.setRequestProperty("Accept-Language", "sv-SE,sv;q=1.0,en-US;q=1.0,en;q=0.9");
                 connection.setInstanceFollowRedirects(false);
                 int status = connection.getResponseCode();

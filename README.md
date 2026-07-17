@@ -13,6 +13,7 @@ Junova AI ar en svensk-engelsk Android-assistent som kor lokalt pa telefonen uta
 - Lokal kunskapsbas med amnesmatchning, raknemotor och langtidsminne.
 - Kortare lokal generering, hard tidsgrans och faktabaserat reservsvar om modellen blir langsam.
 - Relevanskontroll som stoppar fakta och modellsvar som byter till fel amne.
+- Aspektkontroll som skiljer pa till exempel badkvalitet, agare, lage, pris och oppettider.
 - Webbsokning med kallankar nar aktuell eller saknad fakta behovs.
 - OCR, motivanalys, farganalys och jamforelse av tva bilder.
 - Lokal bildgenerator med stil- och formatval samt inspirationsbild.
